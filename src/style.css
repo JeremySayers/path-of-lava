@@ -1,0 +1,47 @@
+:root {
+	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+
+	color: #222;
+	background-color: #ffffff;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: 100%;
+}
+
+body {    
+	margin: 0;
+    display: flex;
+	min-height: 100vh;
+    justify-content: center;
+}
+
+#app {
+	max-width: 1280px;
+	display: flex;
+    flex: 1 1 auto;
+}
+
+.app-container {
+	max-width: 1280px;
+	margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    height: 100%;
+    flex: 1 1 auto;
+}
+
+.file-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.list-container {
+    flex: 1 1 auto
+}
