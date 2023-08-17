@@ -13,7 +13,7 @@ export class ClientTextProcesser {
         for (let i = 0; i < fileLines.length; i++) {
             const currentLine = fileLines[i];
 
-            if (currentLine.includes(loginKeyword) || (generatingKeywords.some(keyword => currentLine.includes(keyword)) && currentLine.includes("Generating"))) {
+            if (currentLine.includes(loginKeyword) || (currentLine.includes("Generating level") && currentLine.includes("area"))) {
                 const unparsedEventDate = `${currentLine.split(" ")[0]} ${currentLine.split(" ")[1]}`;
                 const parsedEventDate = new Date(unparsedEventDate);
 
@@ -32,12 +32,11 @@ export class ClientTextProcesser {
                     var levelStartIndex = currentLine.indexOf("Generating level") + 17;
                     var spaceAfterLevelIndex = currentLine.indexOf(' ', levelStartIndex);
                     var level = currentLine.substring(levelStartIndex, spaceAfterLevelIndex);
+                    const nameStartIndex = currentLine.indexOf("area \"") + 6;
+                    const quoteAfterNameIndex = currentLine.indexOf("\"", nameStartIndex);
+                    const name = currentLine.substring(nameStartIndex, quoteAfterNameIndex);
 
                     if (currentLine.includes(mapKeyword)) {
-                        const nameStartIndex = currentLine.indexOf("MapWorlds") + 9;
-                        const quoteAfterNameIndex = currentLine.indexOf("\"", nameStartIndex);
-                        const name = currentLine.substring(nameStartIndex, quoteAfterNameIndex);
-                        
                         transitionEvents.push(new TransitionEvent(TransitionType.Map, parsedEventDate, name, level, seed));
                     } else if (currentLine.includes(heistKeyword)) {
                         transitionEvents.push(new TransitionEvent(TransitionType.Heist, parsedEventDate, "Heist", level, seed));
@@ -45,8 +44,10 @@ export class ClientTextProcesser {
                         transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, "Hideout", level, seed));
                     } else if (currentLine.includes(rogueHarbourKeyword)) {
                         transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, "Rogue Harbour", level, seed));
+                    } else {
+                        transitionEvents.push(new TransitionEvent(TransitionType.Unknown, parsedEventDate, name, level, seed));
                     }
-                }             
+                }
             }
         }
 
@@ -127,5 +128,6 @@ export enum TransitionType {
     RogueHarbour,
     Heist,
     Login,
-    Logout
+    Logout,
+    Unknown
 }
