@@ -18,7 +18,14 @@ export class ClientTextProcesser {
                 const parsedEventDate = new Date(unparsedEventDate);
 
                 if (currentLine.includes(loginKeyword)) {
+                    if (i !== 0 ) {
+                        const unparsedLogoutEventDate = `${fileLines[i-1].split(" ")[0]} ${fileLines[i-1].split(" ")[1]}`;
+                        const parsedLogoutEventDate = new Date(unparsedLogoutEventDate);
+                        transitionEvents.push(new TransitionEvent(TransitionType.Logout, parsedLogoutEventDate));
+                    }
+
                     transitionEvents.push(new TransitionEvent(TransitionType.Login, parsedEventDate));
+
                     continue;
                 } else {
                     const seed = currentLine.substring(currentLine.indexOf("with seed") + 10);
@@ -53,7 +60,7 @@ export class ClientTextProcesser {
             const currentTransitionEvent = transitionEvents[i];
             let totalActivityTime = 0;
 
-            if (currentTransitionEvent.transitionType === TransitionType.Login) {
+            if (currentTransitionEvent.transitionType === TransitionType.Login || currentTransitionEvent.transitionType === TransitionType.Logout) {
                 continue;
             }
 
@@ -119,5 +126,6 @@ export enum TransitionType {
     Map,
     RogueHarbour,
     Heist,
-    Login
+    Login,
+    Logout
 }

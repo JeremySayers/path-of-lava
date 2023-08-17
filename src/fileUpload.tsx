@@ -20,7 +20,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
     return (
         <>
-            <FileUploader handleChange={handleChange} disabled={file} name="file" types={fileTypes} multiple={false} />
+            <FileUploader handleChange={handleChange} name="file" types={fileTypes} multiple={false} />
             <p>{file ? `Client.txt loaded` : "Upload above"}</p>
         </>
     );
