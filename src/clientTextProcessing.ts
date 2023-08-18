@@ -6,8 +6,7 @@ export class ClientTextProcesser {
         const hideoutKeyword = "Hideout";
         const rogueHarbourKeyword = "HeistHub";
         const heistKeyword = "Heist";
-        const loginKeyword = "LOG FILE OPENING";    
-        const generatingKeywords = [mapKeyword, hideoutKeyword, rogueHarbourKeyword, heistKeyword];
+        const loginKeyword = "LOG FILE OPENING";
         
         let currentSessionStartTime = new Date();
         const transitionEvents: Array<TransitionEvent> = new Array();
@@ -24,11 +23,11 @@ export class ClientTextProcesser {
                     if (i !== 0 ) {
                         const unparsedLogoutEventDate = `${fileLines[i-1].split(" ")[0]} ${fileLines[i-1].split(" ")[1]}`;
                         const parsedLogoutEventDate = new Date(unparsedLogoutEventDate);
-                        transitionEvents.push(new TransitionEvent(TransitionType.Logout, parsedLogoutEventDate, currentSessionStartTime));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Logout, parsedLogoutEventDate, currentSessionStartTime, "Logged out"));
                     }
 
                     currentSessionStartTime = parsedEventDate;
-                    transitionEvents.push(new TransitionEvent(TransitionType.Login, parsedEventDate, currentSessionStartTime));
+                    transitionEvents.push(new TransitionEvent(TransitionType.Login, parsedEventDate, currentSessionStartTime, "Logged in"));
 
                     continue;
                 } else {

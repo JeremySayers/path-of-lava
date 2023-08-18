@@ -5,14 +5,19 @@ import { ClipLoader } from 'react-spinners';
 import { FixedSizeList } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FileUpload } from './fileUpload';
-import { Activity, ClientTextProcesser, TransitionType } from './clientTextProcessing';
+import { Activity, ClientTextProcesser, TransitionType, TransitionEvent } from './clientTextProcessing';
 import { Header } from './header';
 
 export function App() {
     const [activities, setActivites] = useState<Activity[]>([]);
+    const [transitionEvents, setTransitionEvents] = useState<TransitionEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [activityTypefilter, setActivityTypeFilter] = useState<TransitionType[]>(getEnumValues(TransitionType));
     const [sessionFilter, setSessionFilter] = useState<Date | null>(null);
+
+    const filteredTransitionEvents = useMemo(() => {
+        return transitionEvents.filter(transitionEvent => sessionFilter ? transitionEvent.sessionStartTime === sessionFilter : true);
+    }, [transitionEvents, sessionFilter]);
 
     const filteredActivities = useMemo(() => {
         return activities.filter(activity => activityTypefilter.includes(activity.transitionType) && (sessionFilter ? activity.sessionStartTime === sessionFilter : true));
@@ -36,6 +41,12 @@ export function App() {
         </div>
     );
 
+    const TransitionEventRow = ({ index, style }) => (
+        <div class={index % 2 ? 'odd' : 'even'} style={style}>
+            {filteredTransitionEvents[index].name}
+        </div>
+    );
+
     const SessionRow = ({ index, style }) => (
         <div onClick={() => { handleSessionSelected(activitySessionStartTimes[index]) }}
             class={activitySessionStartTimes[index] === sessionFilter ? 'selected-row' : (index % 2 ? 'odd' : 'even')}
@@ -52,7 +63,10 @@ export function App() {
     const hanldeFileTextLoaded = (fileText: string) => {
         const transitionEvents = ClientTextProcesser.convertClientTextToTransitionEvents(fileText);
         const activities = ClientTextProcesser.convertTransitionEventsToActivities(transitionEvents);
+        setTransitionEvents(transitionEvents);
         setActivites(activities);
+
+        setSessionFilter(activities[activities.length - 1]?.sessionStartTime);
     }
 
     const handleFilterUpdated = (transitionType: TransitionType) => {
@@ -79,7 +93,7 @@ export function App() {
                             data-testid="loader"
                         />
                     </div>
-                    {activities.length > 0 && <div class="activity-filter-container">
+                    {false && <div class="activity-filter-container">
                         {getEnumValues(TransitionType).map(activityType => {
                             return <button key={activityType} onClick={() => handleFilterUpdated(activityType)}>{activityType}</button>;
                         })}
@@ -101,6 +115,27 @@ export function App() {
                                             itemCount={activitySessionStartTimes.length}
                                         >
                                             {SessionRow}
+                                        </FixedSizeList>
+                                    )}
+                                </AutoSizer>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="transition-event-container">
+                        <div>Raw Events</div>
+                        <div class="border-container">
+                            <div class="row-container">
+                                {/* 
+                            // @ts-ignore */}
+                                <AutoSizer>
+                                    {({ height, width }) => (
+                                        <FixedSizeList
+                                            height={height}
+                                            width={width}
+                                            itemSize={35}
+                                            itemCount={filteredTransitionEvents.length}
+                                        >
+                                            {TransitionEventRow}
                                         </FixedSizeList>
                                     )}
                                 </AutoSizer>

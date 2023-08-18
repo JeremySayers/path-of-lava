@@ -83,14 +83,28 @@ body div {
     height: 100%;
     flex-direction: column;
     border: 1px solid #000;
+    min-width: 400px;    
 }
 
 .range-filter-container {
     display: flex;
-    flex: 2 1 auto;    
+    flex: 1 1 auto;    
     height: 100%;
     flex-direction: column;
     border: 1px solid #000;
+    min-width: 220px;    
+    max-width: 250px;
+}
+
+.transition-event-container {
+    margin-left: 30px;
+    display: flex;
+    flex: 1 1 auto;    
+    height: 100%;
+    flex-direction: column;
+    border: 1px solid #000;
+    min-width: 220px;    
+    max-width: 250px;
 }
 
 .border-container {
