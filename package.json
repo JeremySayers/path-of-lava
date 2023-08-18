@@ -9,7 +9,7 @@
 	},
 	"dependencies": {
 		"preact": "^10.13.1",
-		"react-drag-drop-files": "^2.3.10",
+		"react-dropzone": "^14.2.3",
 		"react-spinners": "^0.13.8",
 		"react-virtualized-auto-sizer": "^1.0.20",
 		"react-window": "^1.8.9",

@@ -1,27 +1,45 @@
-import { useState } from 'preact/hooks';
+import { useState, useCallback } from 'preact/hooks';
 import './style.css';
-import { FileUploader } from "react-drag-drop-files";
+import { useDropzone } from 'react-dropzone'
 
 interface FileUploadProps {
     hanldeFileTextLoaded: (fileText: string) => void;
     setLoading: (isLoading: boolean) => void;
 }
 
-export const FileUpload = (props: FileUploadProps) => {
-    const [file, setFile] = useState(null);
-    const fileTypes = ["TXT"];
+export function FileUpload(props: FileUploadProps) {
+    const [fileLoaded, setFileLoaded] = useState(false);
+    const onDrop = useCallback((acceptedFiles) => {
+        acceptedFiles.forEach((file) => {
+            const reader = new FileReader()
 
-    const handleChange = async (file) => {
-        props.setLoading(true);
-        setFile(file);
-        props.hanldeFileTextLoaded(await file.text());
-        props.setLoading(false);
-    };
+            reader.onabort = () => console.log('file reading was aborted')
+            reader.onerror = () => console.log('file reading has failed')
+            reader.onload = () => {
+                const fileText = reader.result as string;
+                props.hanldeFileTextLoaded(fileText);
+                props.setLoading(false);
+                setFileLoaded(true);
+            }
+            props.setLoading(true);
+            reader.readAsText(file)
+        })
+
+    }, [])
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        multiple: undefined,
+        onDragEnter: undefined,
+        onDragOver: undefined,
+        onDragLeave: undefined,
+        useFsAccessApi: false
+    })
 
     return (
-        <>
-            <FileUploader handleChange={handleChange} name="file" types={fileTypes} multiple={false} />
-            <p>{file ? `Client.txt loaded` : "Upload above"}</p>
-        </>
-    );
+        <div {...getRootProps()}>
+            <input {...getInputProps()} type="file" />
+            {fileLoaded ? <p>Client.txt loaded, click or drag to reupload.</p>
+                : <p>Drag 'n' drop some files here, or click to select files</p>}
+        </div>
+    )
 }
