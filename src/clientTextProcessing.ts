@@ -45,9 +45,9 @@ export class ClientTextProcesser {
                     } else if (currentLine.includes(heistKeyword)) {
                         transitionEvents.push(new TransitionEvent(TransitionType.Heist, parsedEventDate, currentSessionStartTime, "Heist", level, seed));
                     } else if (currentLine.includes(hideoutKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, "Hideout", level, seed));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, name, level, seed));
                     } else if (currentLine.includes(rogueHarbourKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, "Rogue Harbour", level, seed));
+                        transitionEvents.push(new TransitionEvent(TransitionType.RogueHarbour, parsedEventDate, currentSessionStartTime, "Rogue Harbour", level, seed));
                     } else {
                         transitionEvents.push(new TransitionEvent(TransitionType.Unknown, parsedEventDate, currentSessionStartTime, name, level, seed));
                     }
@@ -75,20 +75,25 @@ export class ClientTextProcesser {
                 }
             }
 
-            if (activities.has(currentTransitionEvent.seed)) {
-                activities.get(currentTransitionEvent.seed).totalTime += totalActivityTime;
-            } else {
-                activities.set(
-                    currentTransitionEvent.seed, 
-                    new Activity(
-                        currentTransitionEvent.transitionType, 
-                        currentTransitionEvent.enterTime, 
-                        totalActivityTime,
-                        currentTransitionEvent.sessionStartTime,
-                        currentTransitionEvent.name, 
-                        currentTransitionEvent.level, 
-                        currentTransitionEvent.seed));
-            }            
+            if (currentTransitionEvent.transitionType === TransitionType.Map || currentTransitionEvent.transitionType === TransitionType.Heist) {
+                if (activities.has(currentTransitionEvent.seed)) {
+                    activities.get(currentTransitionEvent.seed).totalTime += totalActivityTime;
+                }
+            }
+
+            const activitySeed = currentTransitionEvent.seed === "1" ? uuidv4() : currentTransitionEvent.seed;
+
+            activities.set(
+                activitySeed,
+                new Activity(
+                    currentTransitionEvent.transitionType, 
+                    currentTransitionEvent.enterTime, 
+                    totalActivityTime,
+                    currentTransitionEvent.sessionStartTime,
+                    currentTransitionEvent.name, 
+                    currentTransitionEvent.level, 
+                    currentTransitionEvent.seed)
+            );
         }
 
         return Array.from(activities.values());
@@ -102,6 +107,7 @@ export class Activity {
     public sessionStartTime: Date;
     public name?: string;
     public level?: string;
+    public seed?: string;
 
     public constructor(transitionType: TransitionType, enterTime: Date, totalTime: number, sessionStartTime: Date, name?: string, level?: string, seed?: string) {
         this.transitionType = transitionType;
@@ -109,7 +115,8 @@ export class Activity {
         this.totalTime = totalTime;
         this.sessionStartTime = sessionStartTime;
         this.name = name;
-        this.level = level;
+        this.level = level;        
+        this.seed = seed;
     }
 }
 

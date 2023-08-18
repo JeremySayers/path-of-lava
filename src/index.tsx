@@ -32,7 +32,7 @@ export function App() {
 
     const ActivityRow = ({ index, style }) => (
         <div class={index % 2 ? 'odd' : 'even'} style={style}>
-            {filteredActivities[index].name} {filteredActivities[index].level} {convertMsToTime(filteredActivities[index].totalTime)}
+            {filteredActivities[index].name} {filteredActivities[index].level} {convertMsToTime(filteredActivities[index].totalTime)} {filteredActivities[index].seed}
         </div>
     );
 
