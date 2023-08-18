@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export class ClientTextProcesser {
     static convertClientTextToTransitionEvents = (clientText: string): Array<TransitionEvent> => {
         const mapKeyword = "MapWorlds";
@@ -7,6 +9,7 @@ export class ClientTextProcesser {
         const loginKeyword = "LOG FILE OPENING";    
         const generatingKeywords = [mapKeyword, hideoutKeyword, rogueHarbourKeyword, heistKeyword];
         
+        let currentSessionStartTime = new Date();
         const transitionEvents: Array<TransitionEvent> = new Array();
         const fileLines = clientText.split('\r\n');
 
@@ -21,10 +24,11 @@ export class ClientTextProcesser {
                     if (i !== 0 ) {
                         const unparsedLogoutEventDate = `${fileLines[i-1].split(" ")[0]} ${fileLines[i-1].split(" ")[1]}`;
                         const parsedLogoutEventDate = new Date(unparsedLogoutEventDate);
-                        transitionEvents.push(new TransitionEvent(TransitionType.Logout, parsedLogoutEventDate));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Logout, parsedLogoutEventDate, currentSessionStartTime));
                     }
 
-                    transitionEvents.push(new TransitionEvent(TransitionType.Login, parsedEventDate));
+                    currentSessionStartTime = parsedEventDate;
+                    transitionEvents.push(new TransitionEvent(TransitionType.Login, parsedEventDate, currentSessionStartTime));
 
                     continue;
                 } else {
@@ -37,15 +41,15 @@ export class ClientTextProcesser {
                     const name = currentLine.substring(nameStartIndex, quoteAfterNameIndex);
 
                     if (currentLine.includes(mapKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Map, parsedEventDate, name, level, seed));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Map, parsedEventDate, currentSessionStartTime, name, level, seed));
                     } else if (currentLine.includes(heistKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Heist, parsedEventDate, "Heist", level, seed));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Heist, parsedEventDate, currentSessionStartTime, "Heist", level, seed));
                     } else if (currentLine.includes(hideoutKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, "Hideout", level, seed));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, "Hideout", level, seed));
                     } else if (currentLine.includes(rogueHarbourKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, "Rogue Harbour", level, seed));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, "Rogue Harbour", level, seed));
                     } else {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Unknown, parsedEventDate, name, level, seed));
+                        transitionEvents.push(new TransitionEvent(TransitionType.Unknown, parsedEventDate, currentSessionStartTime, name, level, seed));
                     }
                 }
             }
@@ -79,7 +83,8 @@ export class ClientTextProcesser {
                     new Activity(
                         currentTransitionEvent.transitionType, 
                         currentTransitionEvent.enterTime, 
-                        totalActivityTime, 
+                        totalActivityTime,
+                        currentTransitionEvent.sessionStartTime,
                         currentTransitionEvent.name, 
                         currentTransitionEvent.level, 
                         currentTransitionEvent.seed));
@@ -94,13 +99,15 @@ export class Activity {
     public transitionType: TransitionType;
     public enterTime: Date;
     public totalTime: number;
+    public sessionStartTime: Date;
     public name?: string;
     public level?: string;
 
-    public constructor(transitionType: TransitionType, enterTime: Date, totalTime: number, name?: string, level?: string, seed?: string) {
+    public constructor(transitionType: TransitionType, enterTime: Date, totalTime: number, sessionStartTime: Date, name?: string, level?: string, seed?: string) {
         this.transitionType = transitionType;
         this.enterTime = enterTime;
         this.totalTime = totalTime;
+        this.sessionStartTime = sessionStartTime;
         this.name = name;
         this.level = level;
     }
@@ -109,13 +116,15 @@ export class Activity {
 export class TransitionEvent {
     public transitionType: TransitionType;
     public enterTime: Date;
+    public sessionStartTime: Date;
     public name?: string;
     public level?: string;
     public seed?: string;
 
-    public constructor(transitionType: TransitionType, enterTime: Date, name?: string, level?: string, seed?: string) {
+    public constructor(transitionType: TransitionType, enterTime: Date, sessionStartTime: Date, name?: string, level?: string, seed?: string) {
         this.transitionType = transitionType;
         this.enterTime = enterTime;
+        this.sessionStartTime = sessionStartTime;
         this.name = name;
         this.level = level;
         this.seed = seed;
@@ -123,11 +132,11 @@ export class TransitionEvent {
 }
 
 export enum TransitionType {
-    Hideout,
-    Map,
-    RogueHarbour,
-    Heist,
-    Login,
-    Logout,
-    Unknown
+    Hideout = "Hideout",
+    Map = "Map",
+    RogueHarbour = "Rogue Harbour",
+    Heist = "Heist",
+    Login = "Login",
+    Logout = "Logout",
+    Unknown = "Unknown"
 }
