@@ -7,6 +7,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { FileUpload } from './fileUpload';
 import { Activity, ClientTextProcesser, TransitionType, TransitionEvent } from './clientTextProcessing';
 import { Header } from './header';
+import { SessionStats } from './sessionStats';
 
 export function App() {
     const [activities, setActivites] = useState<Activity[]>([]);
@@ -142,25 +143,31 @@ export function App() {
                             </div>
                         </div>
                     </div>
-                    <div class="activity-container">
-                        <div>Activities</div>
-                        <div class="border-container">
-                            <div class="row-container">
-                                {/* 
-                            // @ts-ignore */}
-                                <AutoSizer>
-                                    {({ height, width }) => (
-                                        <FixedSizeList
-                                            height={height}
-                                            width={width}
-                                            itemSize={35}
-                                            itemCount={filteredActivities.length}
-                                        >
-                                            {ActivityRow}
-                                        </FixedSizeList>
-                                    )}
-                                </AutoSizer>
+                    <div class="right-pane">
+                        <div class="activity-container">
+                            <div>Activities</div>
+                            <div class="border-container">
+                                <div class="row-container">
+                                    {/* 
+                                // @ts-ignore */}
+                                    <AutoSizer>
+                                        {({ height, width }) => (
+                                            <FixedSizeList
+                                                height={height}
+                                                width={width}
+                                                itemSize={35}
+                                                itemCount={filteredActivities.length}
+                                            >
+                                                {ActivityRow}
+                                            </FixedSizeList>
+                                        )}
+                                    </AutoSizer>
+                                </div>
                             </div>
+                        </div>
+                        <div class="stats-container">
+                            <div>Stats</div>
+                            <SessionStats activities={filteredActivities} />
                         </div>
                     </div>
                 </div>}
