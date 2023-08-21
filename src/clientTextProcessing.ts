@@ -41,12 +41,12 @@ export class ClientTextProcesser {
 
                     if (currentLine.includes(mapKeyword)) {
                         transitionEvents.push(new TransitionEvent(TransitionType.Map, parsedEventDate, currentSessionStartTime, name, level, seed));
-                    } else if (currentLine.includes(heistKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Heist, parsedEventDate, currentSessionStartTime, "Heist", level, seed));
-                    } else if (currentLine.includes(hideoutKeyword)) {
-                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, name, level, seed));
                     } else if (currentLine.includes(rogueHarbourKeyword)) {
                         transitionEvents.push(new TransitionEvent(TransitionType.RogueHarbour, parsedEventDate, currentSessionStartTime, "Rogue Harbour", level, seed));
+                    } else if (currentLine.includes(hideoutKeyword)) {
+                        transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, name, level, seed));
+                    } else if (currentLine.includes(heistKeyword)) {
+                        transitionEvents.push(new TransitionEvent(TransitionType.Heist, parsedEventDate, currentSessionStartTime, "Heist", level, seed));
                     } else {
                         transitionEvents.push(new TransitionEvent(TransitionType.Unknown, parsedEventDate, currentSessionStartTime, name, level, seed));
                     }
