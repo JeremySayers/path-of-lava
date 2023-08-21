@@ -14,14 +14,14 @@ export function App() {
     const [transitionEvents, setTransitionEvents] = useState<TransitionEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [activityTypefilter, setActivityTypeFilter] = useState<TransitionType[]>(getEnumValues(TransitionType));
-    const [sessionFilter, setSessionFilter] = useState<Date | null>(null);
+    const [sessionFilter, setSessionFilter] = useState<Date[] | null>([]);
 
     const filteredTransitionEvents = useMemo(() => {
-        return transitionEvents.filter(transitionEvent => sessionFilter ? transitionEvent.sessionStartTime === sessionFilter : true);
+        return transitionEvents.filter(transitionEvent => sessionFilter.length > 0 ? sessionFilter.includes(transitionEvent.sessionStartTime) : true);
     }, [transitionEvents, sessionFilter]);
 
     const filteredActivities = useMemo(() => {
-        return activities.filter(activity => activityTypefilter.includes(activity.transitionType) && (sessionFilter ? activity.sessionStartTime === sessionFilter : true));
+        return activities.filter(activity => activityTypefilter.includes(activity.transitionType) && (sessionFilter.length > 0 ? sessionFilter.includes(activity.sessionStartTime) : true));
     }, [activities, activityTypefilter, sessionFilter]);
 
     const activitySessionStartTimes = useMemo(() => {
@@ -50,15 +50,19 @@ export function App() {
 
     const SessionRow = ({ index, style }) => (
         <div onClick={() => { handleSessionSelected(activitySessionStartTimes[index]) }}
-            class={activitySessionStartTimes[index] === sessionFilter ? 'selected-row' : (index % 2 ? 'odd' : 'even')}
+            class={sessionFilter.includes(activitySessionStartTimes[index]) ? 'selected-row' : (index % 2 ? 'odd' : 'even')}
             style={style}
         >
             {activitySessionStartTimes[index].toLocaleString()}
         </div>
     );
 
-    const handleSessionSelected = (session: Date) => {
-        setSessionFilter(session);
+    const handleSessionSelected = (selectedSession: Date) => {
+        if (sessionFilter.includes(selectedSession)) {
+            setSessionFilter([...sessionFilter].filter(session => session !== selectedSession));
+        } else {
+            setSessionFilter([...sessionFilter, selectedSession]);
+        }
     }
 
     const hanldeFileTextLoaded = (fileText: string) => {
@@ -67,7 +71,7 @@ export function App() {
         setTransitionEvents(transitionEvents);
         setActivites(activities);
 
-        setSessionFilter(activities[activities.length - 1]?.sessionStartTime);
+        setSessionFilter([...sessionFilter, activities[activities.length - 1]?.sessionStartTime]);
     }
 
     const handleFilterUpdated = (transitionType: TransitionType) => {
