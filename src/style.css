@@ -90,20 +90,56 @@ body div {
 .activity-container { 
     display: flex;
     height: 100%;
-    flex-direction: column;
-    border: 1px solid #000;
+    flex-direction: row;
     min-width: 400px;
     flex: 1 1 auto;
 }
 
-.stats-container {     
+.activities { 
     display: flex;
     height: 100%;
     flex-direction: column;
     border: 1px solid #000;
     min-width: 400px;
+    flex: 5 1 auto;
+}
+
+.activity-stats {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border: 1px solid #000;
+    min-width: 240px;
+    flex: 0 0 auto;
+    margin-left: 30px;
+}
+
+.trade-container {
+    display: flex;
+    height: 100%;
+    flex-direction: row;
+    min-width: 400px;
     flex: 1 1 auto;
     margin-top: 30px;
+}
+
+.trades {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border: 1px solid #000;
+    min-width: 400px;
+    flex: 5 1 auto;
+}
+
+.trade-stats {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border: 1px solid #000;
+    min-width: 240px;
+    flex: 0 0 auto;
+    margin-left: 30px;
 }
 
 .range-filter-container {

@@ -5,13 +5,15 @@ import { ClipLoader } from 'react-spinners';
 import { FixedSizeList } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FileUpload } from './fileUpload';
-import { Activity, ClientTextProcesser, TransitionType, TransitionEvent } from './clientTextProcessing';
+import { Activity, ClientTextProcesser, TransitionType, TransitionEvent, TradeEvent, TradeState } from './clientTextProcessing';
 import { Header } from './header';
 import { SessionStats } from './sessionStats';
+import { TradeStats } from './tradeStats';
 
 export function App() {
     const [activities, setActivites] = useState<Activity[]>([]);
     const [transitionEvents, setTransitionEvents] = useState<TransitionEvent[]>([]);
+    const [tradeEvents, setTradeEvents] = useState<TradeEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [activityTypefilter, setActivityTypeFilter] = useState<TransitionType[]>(getEnumValues(TransitionType));
     const [sessionFilter, setSessionFilter] = useState<Date[] | null>([]);
@@ -22,6 +24,10 @@ export function App() {
 
     const filteredActivities = useMemo(() => {
         return activities.filter(activity => activityTypefilter.includes(activity.transitionType) && (sessionFilter.length > 0 ? sessionFilter.includes(activity.sessionStartTime) : true));
+    }, [activities, activityTypefilter, sessionFilter]);
+
+    const filteredTrades = useMemo(() => {
+        return tradeEvents.filter(trade => trade.tradeState === TradeState.Accepted && (sessionFilter.length > 0 ? sessionFilter.includes(trade.sessionStartTime) : true));
     }, [activities, activityTypefilter, sessionFilter]);
 
     const activitySessionStartTimes = useMemo(() => {
@@ -39,6 +45,12 @@ export function App() {
     const ActivityRow = ({ index, style }) => (
         <div class={index % 2 ? 'odd' : 'even'} style={style}>
             {filteredActivities[index].name} {filteredActivities[index].level} {convertMsToTime(filteredActivities[index].totalTime)} {filteredActivities[index].seed}
+        </div>
+    );
+
+    const TradeRow = ({ index, style }) => (
+        <div class={index % 2 ? 'odd' : 'even'} style={style}>
+            Sold {filteredTrades[index].itemQuantity} {filteredTrades[index].itemName} for {filteredTrades[index].totalAmount} to {filteredTrades[index].playerName} at {filteredTrades[index].startTime.toLocaleString()}
         </div>
     );
 
@@ -66,10 +78,13 @@ export function App() {
     }
 
     const hanldeFileTextLoaded = (fileText: string) => {
-        const transitionEvents = ClientTextProcesser.convertClientTextToTransitionEvents(fileText);
-        const activities = ClientTextProcesser.convertTransitionEventsToActivities(transitionEvents);
-        setTransitionEvents(transitionEvents);
+        const poeEvents = ClientTextProcesser.convertClientTextToTransitionEvents(fileText);
+        const activities = ClientTextProcesser.convertTransitionEventsToActivities(poeEvents.transitionEvents);
+        setTransitionEvents(poeEvents.transitionEvents);
+        setTradeEvents(poeEvents.tradeEvents);
         setActivites(activities);
+
+        console.log(poeEvents.tradeEvents.reverse());
 
         setSessionFilter([...sessionFilter, activities[activities.length - 1]?.sessionStartTime]);
     }
@@ -126,7 +141,7 @@ export function App() {
                             </div>
                         </div>
                     </div>
-                    <div class="transition-event-container">
+                    {false && <div class="transition-event-container">
                         <div>Raw Events</div>
                         <div class="border-container">
                             <div class="row-container">
@@ -146,32 +161,61 @@ export function App() {
                                 </AutoSizer>
                             </div>
                         </div>
-                    </div>
+                    </div>}
                     <div class="right-pane">
                         <div class="activity-container">
-                            <div>Activities</div>
-                            <div class="border-container">
-                                <div class="row-container">
-                                    {/* 
+                            <div class="activities">
+                                <div>Activities</div>
+                                <div class="border-container">
+                                    <div class="row-container">
+                                        {/* 
                                 // @ts-ignore */}
-                                    <AutoSizer>
-                                        {({ height, width }) => (
-                                            <FixedSizeList
-                                                height={height}
-                                                width={width}
-                                                itemSize={35}
-                                                itemCount={filteredActivities.length}
-                                            >
-                                                {ActivityRow}
-                                            </FixedSizeList>
-                                        )}
-                                    </AutoSizer>
+                                        <AutoSizer>
+                                            {({ height, width }) => (
+                                                <FixedSizeList
+                                                    height={height}
+                                                    width={width}
+                                                    itemSize={35}
+                                                    itemCount={filteredActivities.length}
+                                                >
+                                                    {ActivityRow}
+                                                </FixedSizeList>
+                                            )}
+                                        </AutoSizer>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="activity-stats">
+                                <div>Stats</div>
+                                <SessionStats activities={filteredActivities} />
+                            </div>
                         </div>
-                        <div class="stats-container">
-                            <div>Stats</div>
-                            <SessionStats activities={filteredActivities} />
+                        <div class="trade-container">
+                            <div class="trades">
+                                <div>Trades</div>
+                                <div class="border-container">
+                                    <div class="row-container">
+                                        {/* 
+                                // @ts-ignore */}
+                                        <AutoSizer>
+                                            {({ height, width }) => (
+                                                <FixedSizeList
+                                                    height={height}
+                                                    width={width}
+                                                    itemSize={35}
+                                                    itemCount={filteredTrades.length}
+                                                >
+                                                    {TradeRow}
+                                                </FixedSizeList>
+                                            )}
+                                        </AutoSizer>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="trade-stats">
+                                <div>Stats</div>
+                                <TradeStats trades={filteredTrades} />
+                            </div>
                         </div>
                     </div>
                 </div>}

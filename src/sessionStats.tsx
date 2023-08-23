@@ -7,11 +7,6 @@ interface SessionStatsProps {
     activities: Activity[]
 }
 
-interface SessionStatsByActivity {
-    maps: number;
-    heists: number;
-}
-
 export function SessionStats(props: SessionStatsProps) {
     const mapCount = useMemo(() => {
         return props.activities.filter(activity => activity.transitionType === TransitionType.Map).length;

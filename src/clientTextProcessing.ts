@@ -1,21 +1,25 @@
 import { v4 as uuidv4 } from 'uuid';
 
 export class ClientTextProcesser {
-    static convertClientTextToTransitionEvents = (clientText: string): Array<TransitionEvent> => {
+    static convertClientTextToTransitionEvents = (clientText: string): PoeEvents => {
         const mapKeyword = "MapWorlds";
         const hideoutKeyword = "Hideout";
         const rogueHarbourKeyword = "HeistHub";
         const heistKeyword = "Heist";
         const loginKeyword = "LOG FILE OPENING";
+        const tradeKeywords = ["Hi, I would like to buy your", "Hi, I'd like to buy your", "has joined the area.", "Trade accepted."];
         
         let currentSessionStartTime = new Date();
         const transitionEvents: Array<TransitionEvent> = new Array();
+        const tradeEvents: Array<TradeEvent> = new Array();
         const fileLines = clientText.split('\r\n');
 
         for (let i = 0; i < fileLines.length; i++) {
             const currentLine = fileLines[i];
 
-            if (currentLine.includes(loginKeyword) || (currentLine.includes("Generating level") && currentLine.includes("area"))) {
+            if (currentLine.includes(loginKeyword) || 
+               (currentLine.includes("Generating level") && currentLine.includes("area")) ||
+               (tradeKeywords.some(keyword => currentLine.includes(keyword)))) {
                 const unparsedEventDate = `${currentLine.split(" ")[0]} ${currentLine.split(" ")[1]}`;
                 const parsedEventDate = new Date(unparsedEventDate);
 
@@ -30,7 +34,7 @@ export class ClientTextProcesser {
                     transitionEvents.push(new TransitionEvent(TransitionType.Login, parsedEventDate, currentSessionStartTime, "Logged in"));
 
                     continue;
-                } else {
+                } else if (currentLine.includes("Generating level") && currentLine.includes("area")) {
                     const seed = currentLine.substring(currentLine.indexOf("with seed") + 10);
                     var levelStartIndex = currentLine.indexOf("Generating level") + 17;
                     var spaceAfterLevelIndex = currentLine.indexOf(' ', levelStartIndex);
@@ -50,11 +54,80 @@ export class ClientTextProcesser {
                     } else {
                         transitionEvents.push(new TransitionEvent(TransitionType.Unknown, parsedEventDate, currentSessionStartTime, name, level, seed));
                     }
+                } else if (tradeKeywords.some(keyword => currentLine.includes(keyword))) {
+                    if (currentLine.includes("@From")) {
+                        const playerNameStartIndex = currentLine.indexOf("@From") + 6;
+                        const playerNameEndIndex = currentLine.indexOf(':', playerNameStartIndex);
+                        const playerNameParts = currentLine.substring(playerNameStartIndex, playerNameEndIndex).split(' ');
+                        const playerName = playerNameParts[playerNameParts.length - 1];
+
+                        if (currentLine.includes("Hi, I would like to buy your")) {
+                            const itemStartIndex = currentLine.indexOf("Hi, I would like to buy your") + 29;
+                            const itemEndIndex = currentLine.indexOf("listed for");
+                            const itemName = currentLine.substring(itemStartIndex, itemEndIndex);
+
+                            const priceStartIndex = itemEndIndex + 11;
+                            const priceEndIndex = currentLine.indexOf("in Ancestor") - 1;
+                            const price = currentLine.substring(priceStartIndex, priceEndIndex);
+
+                            tradeEvents.push(new TradeEvent(TradeState.Initiated, parsedEventDate, parsedEventDate, currentSessionStartTime, playerName, itemName, "1", price));
+                        } else if (currentLine.includes("Hi, I'd like to buy your")) {
+                            const itemQuantityStartIndex = currentLine.indexOf("Hi, I'd like to buy your") + 25;
+                            const itemQuantityEndIndex = currentLine.indexOf(' ', itemQuantityStartIndex);
+                            const itemQuantity = currentLine.substring(itemQuantityStartIndex, itemQuantityEndIndex);
+
+                            const itemNameEndIndex = currentLine.indexOf("for my");
+                            const itemName = currentLine.substring(itemQuantityEndIndex + 1, itemNameEndIndex);
+
+                            const priceStartIndex = itemNameEndIndex + 7;
+                            const priceEndIndex = currentLine.indexOf(" in ");
+                            const price = currentLine.substring(priceStartIndex, priceEndIndex);
+
+                            tradeEvents.push(new TradeEvent(TradeState.Initiated, parsedEventDate, parsedEventDate, currentSessionStartTime, playerName, itemName, itemQuantity, price));
+                        }
+                    } else if (currentLine.includes("has joined the area.")) {
+                        const currentLineSplit = currentLine.split(' ');
+                        const playerName = currentLineSplit[currentLineSplit.length - 5];
+
+                        if (tradeEvents.length === 0) {
+                            continue;
+                        }
+
+                        let tradeEventIndex = tradeEvents.length - 1;
+                        let timeDifference = (parsedEventDate.getTime() - tradeEvents[tradeEventIndex].startTime.getTime()) / 60000;
+
+                        while (timeDifference < 5 && tradeEventIndex > 0) {
+                            if (tradeEvents[tradeEventIndex].tradeState === TradeState.Initiated && tradeEvents[tradeEventIndex].playerName === playerName) {
+                                tradeEvents[tradeEventIndex].tradeState = TradeState.EnteredHideout;
+                                break;
+                            }
+
+                            tradeEventIndex--;
+                            timeDifference = (parsedEventDate.getTime() - tradeEvents[tradeEventIndex].startTime.getTime()) / 60000;
+                        }
+                    } else if (currentLine.includes("Trade accepted.")) {
+                        if (tradeEvents.length === 0) {
+                            continue;
+                        }
+
+                        let tradeEventIndex = tradeEvents.length - 1;
+                        let timeDifference = (parsedEventDate.getTime() - tradeEvents[tradeEventIndex].startTime.getTime()) / 60000;
+
+                        while (timeDifference < 5 && tradeEventIndex > 0) {
+                            if (tradeEvents[tradeEventIndex].tradeState === TradeState.EnteredHideout) {
+                                tradeEvents[tradeEventIndex].tradeState = TradeState.Accepted;
+                                break;
+                            }
+
+                            tradeEventIndex--;
+                            timeDifference = (parsedEventDate.getTime() - tradeEvents[tradeEventIndex].startTime.getTime()) / 60000;
+                        }
+                    }
                 }
             }
         }
 
-        return transitionEvents;
+        return {transitionEvents, tradeEvents};
     }
 
     static convertTransitionEventsToActivities = (transitionEvents: Array<TransitionEvent>): Array<Activity> =>{
@@ -77,22 +150,21 @@ export class ClientTextProcesser {
             if (currentTransitionEvent.transitionType === TransitionType.Map || currentTransitionEvent.transitionType === TransitionType.Heist) {
                 if (activities.has(currentTransitionEvent.seed)) {
                     activities.get(currentTransitionEvent.seed).totalTime += totalActivityTime;
+                    continue;
+                } else {
+                    activities.set(
+                        currentTransitionEvent.seed,
+                        new Activity(
+                            currentTransitionEvent.transitionType, 
+                            currentTransitionEvent.enterTime, 
+                            totalActivityTime,
+                            currentTransitionEvent.sessionStartTime,
+                            currentTransitionEvent.name, 
+                            currentTransitionEvent.level, 
+                            currentTransitionEvent.seed)
+                    );
                 }
             }
-
-            const activitySeed = currentTransitionEvent.seed === "1" ? uuidv4() : currentTransitionEvent.seed;
-
-            activities.set(
-                activitySeed,
-                new Activity(
-                    currentTransitionEvent.transitionType, 
-                    currentTransitionEvent.enterTime, 
-                    totalActivityTime,
-                    currentTransitionEvent.sessionStartTime,
-                    currentTransitionEvent.name, 
-                    currentTransitionEvent.level, 
-                    currentTransitionEvent.seed)
-            );
         }
 
         return Array.from(activities.values());
@@ -145,4 +217,37 @@ export enum TransitionType {
     Login = "Login",
     Logout = "Logout",
     Unknown = "Unknown"
+}
+
+export class TradeEvent {
+    public tradeState: TradeState;
+    public startTime: Date;
+    public endTime: Date;
+    public sessionStartTime: Date;
+    public playerName: string;
+    public itemName: string;
+    public itemQuantity: string;
+    public totalAmount: string;
+
+    public constructor(tradeState: TradeState, startTime: Date, endTime: Date, sessionStartTime: Date, playerName: string, itemName: string, itemQuantity: string, totalAmount: string) {
+        this.tradeState = tradeState;
+        this.startTime = startTime;        
+        this.endTime = endTime;
+        this.sessionStartTime = sessionStartTime;
+        this.playerName = playerName;
+        this.itemName = itemName;
+        this.itemQuantity = itemQuantity;
+        this.totalAmount = totalAmount;
+    }
+}
+
+export interface PoeEvents {
+    transitionEvents: Array<TransitionEvent>;
+    tradeEvents: Array<TradeEvent>;
+}
+
+export enum TradeState {
+    Initiated,
+    EnteredHideout,
+    Accepted
 }
