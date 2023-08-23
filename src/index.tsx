@@ -43,7 +43,7 @@ export function App() {
             }
         }
 
-        return activitySessionStartTimesArray.reverse();
+        return activitySessionStartTimesArray;
     }, [activities]);
 
     const ActivityRow = ({ index, style }) => (

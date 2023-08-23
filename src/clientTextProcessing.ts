@@ -64,7 +64,7 @@ export class ClientTextProcesser {
                         if (currentLine.includes("Hi, I would like to buy your")) {
                             const itemStartIndex = currentLine.indexOf("Hi, I would like to buy your") + 29;
 
-                            let itemEndIndexOffset = 11
+                            let itemEndIndexOffset = 11;
                             let itemEndIndex = currentLine.indexOf("listed for");
 
                             // some bots or external programs use "for my", allow for that but if it's still borked skip the trade
