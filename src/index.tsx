@@ -26,8 +26,12 @@ export function App() {
         return activities.filter(activity => activityTypefilter.includes(activity.transitionType) && (sessionFilter.length > 0 ? sessionFilter.includes(activity.sessionStartTime) : true));
     }, [activities, activityTypefilter, sessionFilter]);
 
-    const filteredTrades = useMemo(() => {
+    const filteredCompletedTrades = useMemo(() => {
         return tradeEvents.filter(trade => trade.tradeState === TradeState.Accepted && (sessionFilter.length > 0 ? sessionFilter.includes(trade.sessionStartTime) : true));
+    }, [activities, activityTypefilter, sessionFilter]);
+
+    const filteredOtherTrades = useMemo(() => {
+        return tradeEvents.filter(trade => trade.tradeState !== TradeState.Accepted && (sessionFilter.length > 0 ? sessionFilter.includes(trade.sessionStartTime) : true));
     }, [activities, activityTypefilter, sessionFilter]);
 
     const activitySessionStartTimes = useMemo(() => {
@@ -50,7 +54,7 @@ export function App() {
 
     const TradeRow = ({ index, style }) => (
         <div class={index % 2 ? 'odd' : 'even'} style={style}>
-            Sold {filteredTrades[index].itemQuantity} {filteredTrades[index].itemName} for {filteredTrades[index].totalAmount} to {filteredTrades[index].playerName} at {filteredTrades[index].startTime.toLocaleString()}
+            Sold {filteredCompletedTrades[index].itemQuantity} {filteredCompletedTrades[index].itemName} for {filteredCompletedTrades[index].totalAmount} to {filteredCompletedTrades[index].playerName} at {filteredCompletedTrades[index].startTime.toLocaleString()}
         </div>
     );
 
@@ -203,7 +207,7 @@ export function App() {
                                                     height={height}
                                                     width={width}
                                                     itemSize={35}
-                                                    itemCount={filteredTrades.length}
+                                                    itemCount={filteredCompletedTrades.length}
                                                 >
                                                     {TradeRow}
                                                 </FixedSizeList>
@@ -214,7 +218,7 @@ export function App() {
                             </div>
                             <div class="trade-stats">
                                 <div>Stats</div>
-                                <TradeStats trades={filteredTrades} />
+                                <TradeStats completedTrades={filteredCompletedTrades} otherTrades={filteredOtherTrades} />
                             </div>
                         </div>
                     </div>

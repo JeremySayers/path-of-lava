@@ -3,7 +3,8 @@ import './style.css';
 import { TradeEvent, TradeState } from './clientTextProcessing';
 
 interface TradeStatsProps {
-    trades: TradeEvent[]
+    completedTrades: TradeEvent[]
+    otherTrades: TradeEvent[];
 }
 
 interface TotalSales {
@@ -13,34 +14,34 @@ interface TotalSales {
 
 export function TradeStats(props: TradeStatsProps) {
     const completedTrades = useMemo(() => {
-        return props.trades.filter(trade => trade.tradeState === TradeState.Accepted).length;
-    }, [props.trades]);
+        return props.completedTrades.filter(trade => trade.tradeState === TradeState.Accepted).length;
+    }, [props.completedTrades]);
 
-    const unnfinishedTrades = useMemo(() => {
-        return props.trades.filter(trade => trade.tradeState !== TradeState.Accepted).length;
-    }, [props.trades]);
+    const unfinishedTrades = useMemo(() => {
+        return props.otherTrades.filter(trade => trade.tradeState != TradeState.Accepted).length;
+    }, [props.otherTrades]);
 
     const totalSalesFromTrades = useMemo<TotalSales>(() => {
         let chaos = 0;
         let divine = 0;
 
-        for (let i = 0; i < props.trades.length; i++) {
-            if (props.trades[i].totalAmount.toLowerCase().includes("chaos")) {
-                const splitPriceLine = props.trades[i].totalAmount.split(' ');
+        for (let i = 0; i < props.completedTrades.length; i++) {
+            if (props.completedTrades[i].totalAmount.toLowerCase().includes("chaos")) {
+                const splitPriceLine = props.completedTrades[i].totalAmount.split(' ');
                 chaos += Number(splitPriceLine[0]);
-            } else if (props.trades[i].totalAmount.toLowerCase().includes("divine")) {
-                const splitPriceLine = props.trades[i].totalAmount.split(' ');
+            } else if (props.completedTrades[i].totalAmount.toLowerCase().includes("divine")) {
+                const splitPriceLine = props.completedTrades[i].totalAmount.split(' ');
                 divine += Number(splitPriceLine[0]);
             }
         }
 
         return { chaos, divine }
-    }, [props.trades]);
+    }, [props.completedTrades]);
 
     return (
         <div>
             <p>Completed Sales: {completedTrades ?? 0}</p>
-            <p>Unnfinished Sales: {unnfinishedTrades ?? 0}</p>
+            <p>Unfinished Sales: {unfinishedTrades ?? 0}</p>
             <p>Total Chaos from Sales: {totalSalesFromTrades.chaos ?? 0}</p>
             <p>Total Divine from Sales: {totalSalesFromTrades.divine ?? 0}</p>
         </div>
