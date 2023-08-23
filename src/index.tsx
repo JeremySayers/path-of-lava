@@ -85,10 +85,8 @@ export function App() {
         const poeEvents = ClientTextProcesser.convertClientTextToTransitionEvents(fileText);
         const activities = ClientTextProcesser.convertTransitionEventsToActivities(poeEvents.transitionEvents);
         setTransitionEvents(poeEvents.transitionEvents);
-        setTradeEvents(poeEvents.tradeEvents);
-        setActivites(activities);
-
-        console.log(poeEvents.tradeEvents.reverse());
+        setTradeEvents(poeEvents.tradeEvents.reverse());
+        setActivites(activities.reverse());
 
         setSessionFilter([...sessionFilter, activities[activities.length - 1]?.sessionStartTime]);
     }
