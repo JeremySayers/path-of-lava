@@ -63,11 +63,24 @@ export class ClientTextProcesser {
 
                         if (currentLine.includes("Hi, I would like to buy your")) {
                             const itemStartIndex = currentLine.indexOf("Hi, I would like to buy your") + 29;
-                            const itemEndIndex = currentLine.indexOf("listed for");
+
+                            let itemEndIndexOffset = 11
+                            let itemEndIndex = currentLine.indexOf("listed for");
+
+                            // some bots or external programs use "for my", allow for that but if it's still borked skip the trade
+                            if (itemEndIndex === -1) {
+                                itemEndIndex = currentLine.indexOf("for my");
+                                itemEndIndexOffset = 7;
+
+                                if (itemEndIndex === -1) {
+                                    continue;
+                                }
+                            }
+
                             const itemName = currentLine.substring(itemStartIndex, itemEndIndex);
 
-                            const priceStartIndex = itemEndIndex + 11;
-                            const priceEndIndex = currentLine.indexOf("in Ancestor") - 1;
+                            const priceStartIndex = itemEndIndex + itemEndIndexOffset;
+                            const priceEndIndex = currentLine.indexOf(" in ");
                             const price = currentLine.substring(priceStartIndex, priceEndIndex);
 
                             tradeEvents.push(new TradeEvent(TradeState.Initiated, parsedEventDate, parsedEventDate, currentSessionStartTime, playerName, itemName, "1", price));
