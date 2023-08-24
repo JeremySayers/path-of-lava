@@ -36,7 +36,7 @@ export function FileUpload(props: FileUploadProps) {
     })
 
     return (
-        <div {...getRootProps()}>
+        <div style={{ 'width': '100%' }} {...getRootProps()}>
             <input {...getInputProps()} type="file" />
             {fileLoaded ? <p>Client.txt loaded, click or drag to reupload.</p>
                 : <p>Drag 'n' drop some files here, or click to select files</p>}
