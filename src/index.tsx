@@ -88,7 +88,7 @@ export function App() {
         setTradeEvents(poeEvents.tradeEvents.reverse());
         setActivites(activities.reverse());
 
-        setSessionFilter([...sessionFilter, activities[activities.length - 1]?.sessionStartTime]);
+        setSessionFilter([...sessionFilter, activities[0]?.sessionStartTime]);
     }
 
     const handleFilterUpdated = (transitionType: TransitionType) => {
