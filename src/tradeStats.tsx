@@ -1,5 +1,5 @@
 import { useMemo } from 'preact/hooks';
-import './style.css';
+import './styles/style.css';
 import { TradeEvent, TradeState } from './clientTextProcessing';
 
 interface TradeStatsProps {

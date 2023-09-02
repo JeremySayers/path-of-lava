@@ -1,13 +1,12 @@
-import { useState, useCallback, useMemo } from 'preact/hooks';
-import './style.css';
-import { useDropzone } from 'react-dropzone'
+import { useMemo } from 'preact/hooks';
+import './styles/style.css';
 import { Activity, TransitionType } from './clientTextProcessing';
 
-interface SessionStatsProps {
+interface ActivitiesStatsProps {
     activities: Activity[]
 }
 
-export function SessionStats(props: SessionStatsProps) {
+export function ActivitiesStats(props: ActivitiesStatsProps) {
     const mapCount = useMemo(() => {
         return props.activities.filter(activity => activity.transitionType === TransitionType.Map).length;
     }, [props.activities]);

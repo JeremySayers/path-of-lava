@@ -8,6 +8,7 @@ export class ClientTextProcesser {
         const heistKeyword = "Heist";
         const loginKeyword = "LOG FILE OPENING";
         const tradeKeywords = ["Hi, I would like to buy your", "Hi, I'd like to buy your", "has joined the area.", "Trade accepted."];
+        const deathKeyword = "has been slain.";
         
         let currentSessionStartTime = new Date();
         const transitionEvents: Array<TransitionEvent> = new Array();
@@ -19,7 +20,8 @@ export class ClientTextProcesser {
 
             if (currentLine.includes(loginKeyword) || 
                (currentLine.includes("Generating level") && currentLine.includes("area")) ||
-               (tradeKeywords.some(keyword => currentLine.includes(keyword)))) {
+               (tradeKeywords.some(keyword => currentLine.includes(keyword))) ||
+               (currentLine.includes(deathKeyword))) {
                 const unparsedEventDate = `${currentLine.split(" ")[0]} ${currentLine.split(" ")[1]}`;
                 const parsedEventDate = new Date(unparsedEventDate);
 
@@ -136,6 +138,8 @@ export class ClientTextProcesser {
                             timeDifference = (parsedEventDate.getTime() - tradeEvents[tradeEventIndex].startTime.getTime()) / 60000;
                         }
                     }
+                } else if (currentLine.includes(deathKeyword)) {
+                    
                 }
             }
         }

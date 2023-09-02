@@ -2,12 +2,12 @@ import { useState, useCallback } from 'preact/hooks';
 import './styles/style.css';
 import { useDropzone } from 'react-dropzone'
 
-interface FileUploadProps {
-    hanldeFileTextLoaded: (fileText: string) => void;
+interface ImageUploadProps {
+    hanldeImageLoaded: (imageData: any) => void;
     setLoading: (isLoading: boolean) => void;
 }
 
-export function FileUpload(props: FileUploadProps) {
+export function ImageUpload(props: ImageUploadProps) {
     const [fileLoaded, setFileLoaded] = useState(false);
     const onDrop = useCallback((acceptedFiles) => {
         acceptedFiles.forEach((file) => {
@@ -16,13 +16,13 @@ export function FileUpload(props: FileUploadProps) {
             reader.onabort = () => console.log('file reading was aborted')
             reader.onerror = () => console.log('file reading has failed')
             reader.onload = () => {
-                const fileText = reader.result as string;
-                props.hanldeFileTextLoaded(fileText);
+                const imageData = reader.result;
+                props.hanldeImageLoaded(imageData);
                 props.setLoading(false);
                 setFileLoaded(true);
             }
             props.setLoading(true);
-            reader.readAsText(file)
+            reader.readAsDataURL(file)
         })
 
     }, [])
@@ -38,8 +38,7 @@ export function FileUpload(props: FileUploadProps) {
     return (
         <div style={{ 'width': '100%' }} {...getRootProps()}>
             <input {...getInputProps()} type="file" />
-            {fileLoaded ? <div>Upload new Client.txt</div>
-                : <div>Drag 'n' drop some files here, or click to select files</div>}
+            {!fileLoaded && <div>Upload a screenshot of your atlas (G by default in game).</div>}
         </div>
     )
 }

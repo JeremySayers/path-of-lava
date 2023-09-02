@@ -3,6 +3,7 @@
 	line-height: 1.5;
 	font-weight: 400;
 	background-color: #333;
+    color-scheme: dark;
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -26,10 +27,6 @@ body {
     background: #333;
 }
 
-body div {
-    color:#FFF;
-}
-
 #app {
 	display: flex;
     flex: 1 1 auto;
@@ -38,21 +35,22 @@ body div {
 }
 
 .app-container {
+    width: 100%;
 	max-width: 1600px;
     display: flex;
     flex-direction: column;
     text-align: center;
     height: 100%;
     flex: 1 1 auto;
-    width: 90%;
     margin-bottom: 20px;
 }
 
 .header {
     display: flex;
-    height: 50px;
+    height: 60px;
     background-color: #111;
     align-items: center;
+    justify-content: space-between;
     width: 100%;
 }
 
@@ -60,12 +58,57 @@ body div {
     margin-left: 20px;
 }
 
+.omni-bar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.navigation-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.navigation-button {
+    border: 1px solid #FFF;
+    padding: 3px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
 .file-upload-container {
     display: flex;
     justify-content: center;
     align-items: center;
     border-style: dashed;
-    margin-top: 20px;
+    padding: 5px;
+}
+
+.file-upload-container:only-child {
+    margin:0 auto;
+  }
+
+.search-bar-container {
+    margin-left: 30px;
+}
+
+.date-filter-container {
+}
+
+.search-bar-input {
+    height: 50px;
+    border: 2px solid;
+    color: #FFF;
+    border-color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, .1);
+    font-size: 26px;
+    width: 100%;
+    border-radius: 10px;
 }
 
 .file-container-text {
@@ -76,7 +119,9 @@ body div {
     display: flex;
     height: 100%;
     flex: 1 1 auto;
-    margin-top:30px;
+    margin-top: 30px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 .right-pane {
@@ -121,7 +166,6 @@ body div {
     flex-direction: row;
     min-width: 400px;
     flex: 1 1 auto;
-    margin-top: 30px;
 }
 
 .trades {
