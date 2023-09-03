@@ -52,12 +52,16 @@ export function Notes(props: NotesProps) {
         </div>
     );
 
+    const handleSelectedPlayerChange = (e: any) => {
+        setSelectedPlayerName(e.target.value);
+    }
+
     return (
         <div class="notes-container">
             <div class="notes-player-selector">
-                <select class="notes-player-selector-dropdown" onChange={(e: any) => setSelectedPlayerName(e.target.value)}>
+                <select class="notes-player-selector-dropdown" onChange={handleSelectedPlayerChange}>
                 {playerNames.map(playerName => {
-                    return <option key={playerName} selected={playerName===selectedPlayerName}>{playerName}</option>
+                    return <option key={playerName} selected={playerName===selectedPlayerName} value={playerName}>{playerName}</option>
                 })}
                 </select>
             </div>

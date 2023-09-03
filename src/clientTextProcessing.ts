@@ -149,7 +149,7 @@ export class ClientTextProcesser {
                     const infoKeywordIndex = currentLine.indexOf("[INFO Client");
                     const infoKeywordEndIndex = currentLine.indexOf("]", infoKeywordIndex);
                     const playerNameEndIndex = currentLine.indexOf(":", infoKeywordEndIndex);
-                    const playerName = currentLine.substring(infoKeywordEndIndex + 1, playerNameEndIndex - 1).replace("&", "");
+                    const playerName = currentLine.substring(infoKeywordEndIndex + 2, playerNameEndIndex - 1).replace("&", "");
                     const noteText = currentLine.substring(noteKeywordIndex + 6);
                     notes.push(new Note(parsedEventDate, noteText, playerName));
                 }

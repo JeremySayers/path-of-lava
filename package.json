@@ -9,7 +9,9 @@
 	},
 	"dependencies": {
 		"@wojtekmaj/react-datetimerange-picker": "^5.4.2",
+		"apexcharts": "^3.42.0",
 		"preact": "^10.13.1",
+		"react-apexcharts": "^1.4.1",
 		"react-datepicker": "^4.16.0",
 		"react-dropzone": "^14.2.3",
 		"react-spinners": "^0.13.8",
