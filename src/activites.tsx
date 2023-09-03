@@ -1,6 +1,6 @@
 import { useMemo } from 'preact/hooks';
 import './styles/style.css';
-import { Activity } from './clientTextProcessing';
+import { Activity, TransitionType } from './clientTextProcessing';
 import { FixedSizeList } from 'react-window';
 import { convertMsToTime } from './utilities';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -13,21 +13,42 @@ interface ActivitiesProps {
 }
 
 export function Activities(props: ActivitiesProps) {
-    const filteredActivities = useMemo(() => {
+    const filteredActiveActivities = useMemo(() => {
+        const activeActivities = props.activities.filter(activity => {
+            return activity.transitionType === TransitionType.Map || activity.transitionType === TransitionType.Heist;
+        })
+
         // if a range was set then we'll have an array of dates [from, to]. If neither are null, filter on that.
         if (props.dateRangeFilter && "length" in props.dateRangeFilter && props.dateRangeFilter[0] !== null && props.dateRangeFilter[1] !== null) {
-            return props.activities.filter(activity => {
+            return activeActivities.filter(activity => {
                 return activity.enterTime > props.dateRangeFilter[0] && activity.enterTime < props.dateRangeFilter[1];
             })      
         // if we don't have any filters then we want to return every activity.
         } else {
-            return props.activities;
+            return activeActivities;
         }
     }, [props.activities, props.dateRangeFilter]);
 
+    const filteredDownTimeActivities = useMemo(() => {
+        const downTimeActivities = props.activities.filter(activity => {
+            return activity.transitionType === TransitionType.Hideout || activity.transitionType === TransitionType.RogueHarbour
+        })
+
+        // if a range was set then we'll have an array of dates [from, to]. If neither are null, filter on that.
+        if (props.dateRangeFilter && "length" in props.dateRangeFilter && props.dateRangeFilter[0] !== null && props.dateRangeFilter[1] !== null) {
+            return downTimeActivities.filter(activity => {
+                return activity.enterTime > props.dateRangeFilter[0] && activity.enterTime < props.dateRangeFilter[1];
+            })      
+        // if we don't have any filters then we want to return every activity.
+        } else {
+            return downTimeActivities;
+        }
+    }, [props.activities, props.dateRangeFilter]);
+
+
     const ActivityRow = ({ index, style }) => (
         <div class={index % 2 ? 'odd' : 'even'} style={style}>
-            {filteredActivities[index].name} {filteredActivities[index].level} {convertMsToTime(filteredActivities[index].totalTime)} {filteredActivities[index].seed}
+            {filteredActiveActivities[index].name} {filteredActiveActivities[index].level} {convertMsToTime(filteredActiveActivities[index].totalTime)} {filteredActiveActivities[index].seed}
         </div>
     );
 
@@ -45,7 +66,7 @@ export function Activities(props: ActivitiesProps) {
                                     height={height}
                                     width={width}
                                     itemSize={35}
-                                    itemCount={filteredActivities.length}
+                                    itemCount={filteredActiveActivities.length}
                                 >
                                     {ActivityRow}
                                 </FixedSizeList>
@@ -56,7 +77,7 @@ export function Activities(props: ActivitiesProps) {
             </div>
             <div class="activity-stats">
                 <div>Stats</div>
-                <ActivitiesStats activities={filteredActivities} />
+                <ActivitiesStats activeActivities={filteredActiveActivities} downTimeActivities={filteredDownTimeActivities}/>
             </div>
         </div>
     )

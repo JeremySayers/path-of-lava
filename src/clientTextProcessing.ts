@@ -193,6 +193,18 @@ export class ClientTextProcesser {
                             currentTransitionEvent.seed)
                     );
                 }
+            } else if (currentTransitionEvent.transitionType === TransitionType.Hideout || currentTransitionEvent.transitionType === TransitionType.RogueHarbour) {
+                activities.set(
+                    uuidv4(),
+                    new Activity(
+                        currentTransitionEvent.transitionType, 
+                        currentTransitionEvent.enterTime, 
+                        totalActivityTime,
+                        currentTransitionEvent.sessionStartTime,
+                        currentTransitionEvent.name, 
+                        currentTransitionEvent.level, 
+                        currentTransitionEvent.seed)
+                );
             }
         }
 

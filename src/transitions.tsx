@@ -25,7 +25,7 @@ export function Transitions(props: TransitionProps) {
 
     const TransitionEventRow = ({ index, style }) => (
         <div class={index % 2 ? 'odd' : 'even'} style={style}>
-            {filteredTransitionEvents[index].name}
+            {filteredTransitionEvents[index].name} {filteredTransitionEvents[index].enterTime.toLocaleString()}
         </div>
     );
 
