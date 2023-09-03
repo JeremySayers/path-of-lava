@@ -9,10 +9,13 @@ export class ClientTextProcesser {
         const loginKeyword = "LOG FILE OPENING";
         const tradeKeywords = ["Hi, I would like to buy your", "Hi, I'd like to buy your", "has joined the area.", "Trade accepted."];
         const deathKeyword = "has been slain.";
+        const noteKeyword = "[Note]";
         
         let currentSessionStartTime = new Date();
         const transitionEvents: Array<TransitionEvent> = new Array();
         const tradeEvents: Array<TradeEvent> = new Array();
+        const notes: Array<Note> = new Array();
+
         const fileLines = clientText.split('\r\n');
 
         for (let i = 0; i < fileLines.length; i++) {
@@ -21,7 +24,8 @@ export class ClientTextProcesser {
             if (currentLine.includes(loginKeyword) || 
                (currentLine.includes("Generating level") && currentLine.includes("area")) ||
                (tradeKeywords.some(keyword => currentLine.includes(keyword))) ||
-               (currentLine.includes(deathKeyword))) {
+               (currentLine.includes(deathKeyword)) ||
+               (currentLine.includes(noteKeyword))) {
                 const unparsedEventDate = `${currentLine.split(" ")[0]} ${currentLine.split(" ")[1]}`;
                 const parsedEventDate = new Date(unparsedEventDate);
 
@@ -140,11 +144,19 @@ export class ClientTextProcesser {
                     }
                 } else if (currentLine.includes(deathKeyword)) {
                     
+                } else if (currentLine.includes(noteKeyword)) {
+                    const noteKeywordIndex = currentLine.indexOf("[Note]");
+                    const infoKeywordIndex = currentLine.indexOf("[INFO Client");
+                    const infoKeywordEndIndex = currentLine.indexOf("]", infoKeywordIndex);
+                    const playerNameEndIndex = currentLine.indexOf(":", infoKeywordEndIndex);
+                    const playerName = currentLine.substring(infoKeywordEndIndex + 1, playerNameEndIndex - 1).replace("&", "");
+                    const noteText = currentLine.substring(noteKeywordIndex + 6);
+                    notes.push(new Note(parsedEventDate, noteText, playerName));
                 }
             }
         }
 
-        return {transitionEvents, tradeEvents};
+        return {transitionEvents, tradeEvents, notes};
     }
 
     static convertTransitionEventsToActivities = (transitionEvents: Array<TransitionEvent>): Array<Activity> =>{
@@ -258,9 +270,22 @@ export class TradeEvent {
     }
 }
 
+export class Note {
+    public createdTime: Date;
+    public text: string;
+    public playerName: string;
+
+    public constructor(createdTime: Date, text: string, playerName: string) {
+        this.createdTime = createdTime;
+        this.text = text;
+        this.playerName = playerName;
+    }
+}
+
 export interface PoeEvents {
     transitionEvents: Array<TransitionEvent>;
     tradeEvents: Array<TradeEvent>;
+    notes: Array<Note>;
 }
 
 export enum TradeState {

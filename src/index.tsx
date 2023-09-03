@@ -3,18 +3,20 @@ import { useState } from 'preact/hooks';
 import './styles/style.css';
 import { ClipLoader } from 'react-spinners';
 import { FileUpload } from './fileUpload';
-import { Activity, ClientTextProcesser, TransitionEvent, TradeEvent } from './clientTextProcessing';
+import { Activity, ClientTextProcesser, TransitionEvent, TradeEvent, Note } from './clientTextProcessing';
 import { Header } from './header';
 import { Activities } from './activites';
 import { DateFilter, DateRange } from './dateFilter';
 import { Navigation, NavigationPage } from './navigation';
 import { Transitions } from './transitions';
 import { Trades } from './trades';
+import { Notes } from './notes';
 
 export function App() {
     const [activities, setActivites] = useState<Activity[]>([]);
     const [transitionEvents, setTransitionEvents] = useState<TransitionEvent[]>([]);
     const [tradeEvents, setTradeEvents] = useState<TradeEvent[]>([]);
+    const [notes, setNotes] = useState<Note[]>([]);
     const [loading, setLoading] = useState(false);
     const [activeNavigationPage, setActiveNavigationPage] = useState<NavigationPage>(NavigationPage.Activities);
     const [dateRangeFilter, setDateRangeFilter] = useState<DateRange>([new Date(new Date().setHours(0, 0, 0, 0)), new Date(new Date().setHours(23, 59, 59, 999))]);
@@ -23,6 +25,7 @@ export function App() {
         const poeEvents = ClientTextProcesser.convertClientTextToTransitionEvents(fileText);
         const activities = ClientTextProcesser.convertTransitionEventsToActivities(poeEvents.transitionEvents);
         setTransitionEvents(poeEvents.transitionEvents);
+        setNotes(poeEvents.notes.reverse());
         setTradeEvents(poeEvents.tradeEvents.reverse());
         setActivites(activities.reverse());
     }
@@ -65,6 +68,9 @@ export function App() {
                     }
                     {activeNavigationPage === NavigationPage.Trades &&
                         <Trades tradeEvents={tradeEvents} dateRangeFilter={dateRangeFilter}/>
+                    }
+                    {activeNavigationPage === NavigationPage.Notes &&
+                        <Notes notes={notes} dateRangeFilter={dateRangeFilter}/>
                     }
                 </div>}
             </div>

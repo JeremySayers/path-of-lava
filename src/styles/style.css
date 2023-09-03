@@ -150,6 +150,31 @@ body {
     flex: 5 1 auto;
 }
 
+.notes-container { 
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    min-width: 400px;
+    flex: 1 1 auto;
+}
+
+.notes-player-selector {
+    width: 100%;
+}
+
+.notes-player-selector-dropdown {
+    width: 100%;
+}
+
+.notes { 
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border: 1px solid #000;
+    min-width: 400px;
+    flex: 5 1 auto;
+}
+
 .activity-stats {
     display: flex;
     height: 100%;
@@ -198,14 +223,12 @@ body {
 }
 
 .transition-event-container {
-    margin-left: 30px;
     display: flex;
     flex: 1 1 auto;    
     height: 100%;
     flex-direction: column;
     border: 1px solid #000;
-    min-width: 220px;    
-    max-width: 250px;
+    min-width: 400px;
 }
 
 .border-container {
@@ -220,7 +243,7 @@ body {
     flex: 1 1 auto;
 }
 
-.selected-row {
+.selected {
     background-color: #5c9964;
     color: #FFF;
 }
