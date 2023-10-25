@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class ClientTextProcesser {
     static convertClientTextToTransitionEvents = (clientText: string): PoeEvents => {
         const mapKeyword = "MapWorlds";
+        const sanctumKeywords = ["SanctumCellar", "SanctumVaults", "SanctumNave", "SanctumCrypt"];
         const hideoutKeyword = "Hideout";
         const rogueHarbourKeyword = "HeistHub";
         const heistKeyword = "Heist";
@@ -57,6 +58,16 @@ export class ClientTextProcesser {
                         transitionEvents.push(new TransitionEvent(TransitionType.Hideout, parsedEventDate, currentSessionStartTime, name, level, seed));
                     } else if (currentLine.includes(heistKeyword)) {
                         transitionEvents.push(new TransitionEvent(TransitionType.Heist, parsedEventDate, currentSessionStartTime, "Heist", level, seed));
+                    }else if (sanctumKeywords.some(keyword => currentLine.includes(keyword))) {
+                        if (currentLine.includes(sanctumKeywords[0])) {
+                            transitionEvents.push(new TransitionEvent(TransitionType.FirstFloorSanctumRoom, parsedEventDate, currentSessionStartTime, "Sanctum - First Floor Room", level, seed));
+                        } else if (currentLine.includes(sanctumKeywords[1])){
+                            transitionEvents.push(new TransitionEvent(TransitionType.SecondFloorSanctumRoom, parsedEventDate, currentSessionStartTime, "Sanctum - Second Floor Room", level, seed));
+                        } else if (currentLine.includes(sanctumKeywords[2])){
+                            transitionEvents.push(new TransitionEvent(TransitionType.ThirdFloorSanctumRoom, parsedEventDate, currentSessionStartTime, "Sanctum - Third Floor Room", level, seed));
+                        } else if (currentLine.includes(sanctumKeywords[3])){
+                            transitionEvents.push(new TransitionEvent(TransitionType.FourthFloorSanctumRoom, parsedEventDate, currentSessionStartTime, "Sanctum - Fourth Floor Room", level, seed));
+                        }                        
                     } else {
                         transitionEvents.push(new TransitionEvent(TransitionType.Unknown, parsedEventDate, currentSessionStartTime, name, level, seed));
                     }
@@ -193,6 +204,21 @@ export class ClientTextProcesser {
                             currentTransitionEvent.seed)
                     );
                 }
+            } else if (currentTransitionEvent.transitionType === TransitionType.FirstFloorSanctumRoom || 
+                      currentTransitionEvent.transitionType === TransitionType.SecondFloorSanctumRoom ||
+                      currentTransitionEvent.transitionType === TransitionType.ThirdFloorSanctumRoom ||
+                      currentTransitionEvent.transitionType === TransitionType.FourthFloorSanctumRoom) {
+                activities.set(
+                    currentTransitionEvent.seed,
+                    new Activity(
+                        currentTransitionEvent.transitionType, 
+                        currentTransitionEvent.enterTime, 
+                        totalActivityTime,
+                        currentTransitionEvent.sessionStartTime,
+                        currentTransitionEvent.name, 
+                        currentTransitionEvent.level, 
+                        currentTransitionEvent.seed)
+                );
             } else if (currentTransitionEvent.transitionType === TransitionType.Hideout || currentTransitionEvent.transitionType === TransitionType.RogueHarbour) {
                 activities.set(
                     uuidv4(),
@@ -251,6 +277,10 @@ export class TransitionEvent {
 }
 
 export enum TransitionType {
+    FirstFloorSanctumRoom = "First Floor Room",
+    SecondFloorSanctumRoom = "Second Floor Room",
+    ThirdFloorSanctumRoom = "Third Floor Room",
+    FourthFloorSanctumRoom = "Fourth Floor Room",
     Hideout = "Hideout",
     Map = "Map",
     RogueHarbour = "Rogue Harbour",

@@ -17,6 +17,13 @@ export function ActivitiesStats(props: ActivitiesStatsProps) {
         return props.activeActivities.filter(activity => activity.transitionType === TransitionType.Heist).length;
     }, [props.activeActivities]);
 
+    const sanctumRoomCount = useMemo(() => {
+        return props.activeActivities.filter(activity => activity.transitionType === TransitionType.FirstFloorSanctumRoom ||
+            activity.transitionType === TransitionType.SecondFloorSanctumRoom ||
+            activity.transitionType === TransitionType.ThirdFloorSanctumRoom ||
+            activity.transitionType === TransitionType.FourthFloorSanctumRoom).length;
+    }, [props.activeActivities]);
+
     const hideoutDowntime = useMemo(() => {
         let totalHideoutTime = 0;
 
@@ -53,6 +60,21 @@ export function ActivitiesStats(props: ActivitiesStatsProps) {
         return totalMapActiveTime;
     }, [props.activeActivities]);
 
+    const sanctumRoomActiveTime = useMemo(() => {
+        let totalSanctumRoomActiveTime = 0;
+
+        props.activeActivities.forEach(activity => {
+            if (activity.transitionType === TransitionType.FirstFloorSanctumRoom ||
+                activity.transitionType === TransitionType.SecondFloorSanctumRoom ||
+                activity.transitionType === TransitionType.ThirdFloorSanctumRoom ||
+                activity.transitionType === TransitionType.FourthFloorSanctumRoom) {
+                totalSanctumRoomActiveTime += activity.totalTime;
+            }
+        });
+
+        return totalSanctumRoomActiveTime;
+    }, [props.activeActivities]);
+
     const heistActiveTime = useMemo(() => {
         let totalHeistActiveTime = 0;
 
@@ -67,15 +89,19 @@ export function ActivitiesStats(props: ActivitiesStatsProps) {
 
     return (
         <div>
-            {mapCount > 0 &&<p>Maps: {mapCount}</p>}
+            {mapCount > 0 && <p>Maps: {mapCount}</p>}
             {heistsCount > 0 && <p>Heists: {heistsCount}</p>}
+            {sanctumRoomCount > 0 && <p>Sanctum Rooms: {sanctumRoomCount}</p>}
+            {sanctumRoomCount > 0 && <p>Total Sanctums (Guess): {Math.floor(sanctumRoomCount / 32)}</p>}
             {mapCount > 0 && <p>Average Map Time: {convertMsToTime(mapActiveTime / mapCount)}</p>}
             {heistsCount > 0 && <p>Average Heist Time: {convertMsToTime(heistActiveTime / heistsCount)}</p>}
-            {mapActiveTime > 0 && <p>Time in Maps: {convertMsToTime(mapActiveTime)}</p>}
-            {heistActiveTime > 0 &&<p>Time in Heist: {convertMsToTime(heistActiveTime) ?? 0}</p>}
+            {sanctumRoomCount > 0 && <p>Average Sanctum Room Time: {convertMsToTime(sanctumRoomActiveTime / sanctumRoomCount)}</p>}
+            {mapActiveTime > 0 && <p>Time in Maps: {convertMsToTime(mapActiveTime) ?? 0}</p>}
+            {heistActiveTime > 0 && <p>Time in Heist: {convertMsToTime(heistActiveTime) ?? 0}</p>}
+            {sanctumRoomActiveTime > 0 && <p>Time in Sanctum: {convertMsToTime(sanctumRoomActiveTime) ?? 0}</p>}
             <p>Time in Hideout: {convertMsToTime(hideoutDowntime) ?? 0}</p>
             <p>Time in Harbour: {convertMsToTime(rogueHarbourDownTime) ?? 0}</p>
-            <p>Active Percentage: {(((mapActiveTime + heistActiveTime) / (mapActiveTime + heistActiveTime + hideoutDowntime + rogueHarbourDownTime)) * 100).toFixed(2)}%</p>
+            <p>Active Percentage: {(((mapActiveTime + heistActiveTime + sanctumRoomActiveTime) / (mapActiveTime + heistActiveTime + hideoutDowntime + rogueHarbourDownTime)) * 100).toFixed(2)}%</p>
         </div>
     )
 }

@@ -15,15 +15,15 @@ interface ActivitiesProps {
 export function Activities(props: ActivitiesProps) {
     const filteredActiveActivities = useMemo(() => {
         const activeActivities = props.activities.filter(activity => {
-            return activity.transitionType === TransitionType.Map || activity.transitionType === TransitionType.Heist;
+            return activity.transitionType === TransitionType.Map || activity.transitionType === TransitionType.Heist || TransitionType.FirstFloorSanctumRoom || TransitionType.SecondFloorSanctumRoom || TransitionType.ThirdFloorSanctumRoom || TransitionType.FourthFloorSanctumRoom;
         })
 
         // if a range was set then we'll have an array of dates [from, to]. If neither are null, filter on that.
         if (props.dateRangeFilter && "length" in props.dateRangeFilter && props.dateRangeFilter[0] !== null && props.dateRangeFilter[1] !== null) {
             return activeActivities.filter(activity => {
                 return activity.enterTime > props.dateRangeFilter[0] && activity.enterTime < props.dateRangeFilter[1];
-            })      
-        // if we don't have any filters then we want to return every activity.
+            })
+            // if we don't have any filters then we want to return every activity.
         } else {
             return activeActivities;
         }
@@ -38,8 +38,8 @@ export function Activities(props: ActivitiesProps) {
         if (props.dateRangeFilter && "length" in props.dateRangeFilter && props.dateRangeFilter[0] !== null && props.dateRangeFilter[1] !== null) {
             return downTimeActivities.filter(activity => {
                 return activity.enterTime > props.dateRangeFilter[0] && activity.enterTime < props.dateRangeFilter[1];
-            })      
-        // if we don't have any filters then we want to return every activity.
+            })
+            // if we don't have any filters then we want to return every activity.
         } else {
             return downTimeActivities;
         }
@@ -77,7 +77,7 @@ export function Activities(props: ActivitiesProps) {
             </div>
             <div class="activity-stats">
                 <div>Stats</div>
-                <ActivitiesStats activeActivities={filteredActiveActivities} downTimeActivities={filteredDownTimeActivities}/>
+                <ActivitiesStats activeActivities={filteredActiveActivities} downTimeActivities={filteredDownTimeActivities} />
             </div>
         </div>
     )
